@@ -3,6 +3,7 @@
  */
 
 import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
 import type { 
   ExtensionManifest, 
   ValidationResult,
@@ -13,6 +14,7 @@ import type {
 import manifestSchema from '../schemas/manifest.schema.json';
 
 const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
 const validateManifestSchema = ajv.compile(manifestSchema);
 
 /**
@@ -46,7 +48,7 @@ export function validateManifestStructure(manifest: unknown): ValidationResult {
  * Validate semantic version format
  */
 export function isValidSemver(version: string): boolean {
-  const semverRegex = /^\d+\.\d+\.\d+(-[a-z0-9-]+)?$/;
+  const semverRegex = /^\d+\.\d+\.\d+(-[a-z0-9-.]+)?$/;
   return semverRegex.test(version);
 }
 
@@ -143,7 +145,7 @@ export function isCompatibleVersion(
  * Validate extension ID format (reverse domain notation)
  */
 export function isValidExtensionId(id: string): boolean {
-  const idRegex = /^[a-z0-9][a-z0-9-]*\.[a-z0-9][a-z0-9-]*\.[a-z0-9-]+$/;
+  const idRegex = /^[a-z0-9][a-z0-9-]*\.[a-z0-9][a-z0-9-]*(\.[a-z0-9][a-z0-9-]*)+$/;
   return idRegex.test(id);
 }
 
