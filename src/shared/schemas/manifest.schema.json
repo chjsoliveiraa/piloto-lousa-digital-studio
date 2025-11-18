@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lousa.digital/schemas/manifest-v1.0.json",
+  "title": "Lousa Digital Extension Manifest",
+  "description": "Schema for Lousa Digital extension manifest files",
+  "type": "object",
+  "required": [
+    "$schema",
+    "manifest_version",
+    "schema_version",
+    "metadata",
+    "type",
+    "category",
+    "requirements",
+    "resources",
+    "permissions",
+    "integrity"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Schema reference URL"
+    },
+    "manifest_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Manifest format version (semver)"
+    },
+    "schema_version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Schema version (semver)"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["id", "name", "version", "description", "author", "license"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*\\.[a-z0-9][a-z0-9-]*\\.[a-z0-9-]+$",
+          "description": "Unique extension identifier (reverse domain notation)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Extension display name"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[a-z0-9-]+)?$",
+          "description": "Extension version (semver)"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Extension description"
+        },
+        "author": {
+          "type": "object",
+          "required": ["name", "email"],
+          "properties": {
+            "name": { "type": "string" },
+            "email": { "type": "string", "format": "email" },
+            "url": { "type": "string", "format": "uri" }
+          }
+        },
+        "license": {
+          "type": "string",
+          "description": "SPDX license identifier"
+        },
+        "homepage": {
+          "type": "string",
+          "format": "uri"
+        },
+        "repository": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "type": {
+      "type": "string",
+      "enum": ["template-pack", "tool", "theme", "integration", "resource-pack"],
+      "description": "Extension type"
+    },
+    "category": {
+      "type": "string",
+      "description": "Extension category"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "uniqueItems": true,
+      "description": "Searchable tags"
+    },
+    "targetAudience": {
+      "type": "array",
+      "items": { 
+        "type": "string",
+        "enum": ["infantil", "fundamental-1", "fundamental-2", "medio", "superior", "all"]
+      },
+      "uniqueItems": true,
+      "description": "Target education levels"
+    },
+    "requirements": {
+      "type": "object",
+      "required": ["minAppVersion", "dependencies"],
+      "properties": {
+        "minAppVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "description": "Minimum app version required"
+        },
+        "maxAppVersion": {
+          "type": "string",
+          "pattern": "^\\d+\\.(\\d+|x)\\.(\\d+|x)$",
+          "description": "Maximum app version supported"
+        },
+        "platform": {
+          "type": "array",
+          "items": { 
+            "type": "string",
+            "enum": ["win32", "darwin", "linux"]
+          },
+          "uniqueItems": true,
+          "description": "Supported platforms"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "version", "optional"],
+            "properties": {
+              "id": { "type": "string" },
+              "version": { "type": "string" },
+              "optional": { "type": "boolean" }
+            }
+          },
+          "description": "Extension dependencies"
+        }
+      }
+    },
+    "resources": {
+      "type": "object",
+      "required": ["baseUrl", "manifest"],
+      "properties": {
+        "baseUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "Base URL for cloud resources"
+        },
+        "manifest": {
+          "type": "object",
+          "description": "Resource manifest paths"
+        },
+        "cdn": {
+          "type": "object",
+          "properties": {
+            "provider": {
+              "type": "string",
+              "enum": ["cloudflare", "aws", "google", "azure", "custom"]
+            },
+            "region": { "type": "string" },
+            "caching": {
+              "type": "object",
+              "required": ["enabled", "ttl"],
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "ttl": { "type": "number", "minimum": 0 },
+                "immutable": { "type": "boolean" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "required": ["required", "optional", "restrictedApis"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "Required permissions"
+        },
+        "optional": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "Optional permissions"
+        },
+        "restrictedApis": {
+          "type": "array",
+          "items": { "type": "string" },
+          "uniqueItems": true,
+          "description": "Restricted API access"
+        }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "required": ["checksum"],
+      "properties": {
+        "checksum": {
+          "type": "object",
+          "required": ["algorithm", "manifest"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["sha256", "sha512"]
+            },
+            "manifest": { "type": "string" },
+            "resources": { "type": "string" }
+          }
+        },
+        "signature": {
+          "type": "object",
+          "required": ["algorithm", "publicKey", "signature"],
+          "properties": {
+            "algorithm": {
+              "type": "string",
+              "enum": ["RSA-SHA256", "ECDSA-SHA256"]
+            },
+            "publicKey": { "type": "string" },
+            "signature": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}
